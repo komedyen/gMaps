@@ -1,0 +1,27 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Address:</b>
+  <%= @location.address %>
+</p>
+
+<p>
+  <b>Latitude:</b>
+  <%= @location.latitude %>
+</p>
+
+<p>
+  <b>Longitude:</b>
+  <%= @location.longitude %>
+</p>
+
+<h3>Nearby locations</h3>
+<ul>
+  <li>Airport: <%= link_to @location.air.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, @location.air.address, options = {:units => :km}).round(2) %> kilometers)</li>
+  <li>Bus Stop: <%= link_to @location.bus.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, @location.bus.address, options = {:units => :km}).round(2) %> kilometers)</li>
+  <li>Hospital: <%= link_to @location.hosp.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, @location.hosp.address, options = {:units => :km}).round(2) %> kilometers)</li>
+</ul></ul>
+
+
+<%= link_to 'Edit', edit_location_path(@location) %> |
+<%= link_to 'Back', locations_path %>
