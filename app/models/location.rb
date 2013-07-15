@@ -1,6 +1,7 @@
 require 'nokogiri'
 require 'geocoder'
 require 'open-uri'
+require 'mechanize'
 
 class Location < ActiveRecord::Base
   attr_accessible :address, :latitude, :longitude
@@ -9,32 +10,54 @@ class Location < ActiveRecord::Base
   after_validation :geocode, :reverse_geocode
 
   def air
+    @ports = []
     loc = Geocoder.search(address).first
-    doc = Nokogiri::HTML(open(URI.encode("https://maps.google.com/maps?q=airport+" << address.tr(' ', '+'))))
-    link = doc.css('#link_A_2')[0]
-    addr = link.content
-    airport = Geocoder.search(addr)
-    if airport.first.country.eql?(loc.country)
-      airport.first
-    else
-      link = doc.css('#link_B_2')[0]
+    prep = 'near+' << loc.address_components[4]['long_name'] << '+' << loc.country
+    agent = Mechanize.new
+    page = agent.get('https://maps.google.com/maps?q=airport+' << prep)
+    doc = page.parser
+    doc.css('span.pp-place-title').each do |link|
       addr = link.content
       airport = Geocoder.search(addr)
+      @ports << airport
     end
-
-    airport.first
+    @ports
   end
 
   def bus
-    doc = Nokogiri::HTML(open(URI.encode("https://maps.google.com/maps?q=otobus+duraklari+" << address.tr(' ', '+'))))
-    link = doc.css('span span')[8]
-    addr = link.content
-    busstop = Geocoder.search(addr).first
+    @stops = []
+    agent = Mechanize.new
+    page = agent.get('https://maps.google.com/maps?q=otobus+duraklari+near+' << address.tr(' ', '+'))
+    doc = page.parser
+    doc.css('span.pp-headline-item.pp-headline-address').each do |link|
+      addr = link.content
+      stop = Geocoder.search(addr)
+      @stops << stop
+    end
+    @stops
+  end
+
+  def restaurant
+    @places = []
+    agent = Mechanize.new
+    page = agent.get('https://maps.google.com/maps?q=restaurants+near+' << address.tr(' ', '+'))
+    doc = page.parser
+    begin
+      doc.css('span.pp-headline-item.pp-headline-address').each do |link|
+        addr = link.content
+        place = Geocoder.search(addr)
+        puts addr
+        @places << place
+      end
+    end while agent.click(page.search(:css => 'td.b'))
+    @places
   end
 
   def hosp
-    doc = Nokogiri::HTML(open(URI.encode("https://maps.google.com/maps?q=hospital+" << address.tr(' ', '+'))))
-    link = doc.css('#link_A_2')[0]
+    agent = Mechanize.new
+    page = agent.get('https://maps.google.com/maps?q=hospital+near+' << address.tr(' ', '+'))
+    doc = page.parser
+    link = doc.css('span.pp-headline-item.pp-headline-address').first
     addr = link.content
     hospital = Geocoder.search(addr).first
   end

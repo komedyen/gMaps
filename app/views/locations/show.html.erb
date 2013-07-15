@@ -15,12 +15,28 @@
   <%= @location.longitude %>
 </p>
 
-<h3>Nearby locations</h3>
-<ul>
-  <li>Airport: <%= link_to @location.air.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, @location.air.address, options = {:units => :km}).round(2) %> kilometers)</li>
-  <li>Bus Stop: <%= link_to @location.bus.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, @location.bus.address, options = {:units => :km}).round(2) %> kilometers)</li>
-  <li>Hospital: <%= link_to @location.hosp.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, @location.hosp.address, options = {:units => :km}).round(2) %> kilometers)</li>
-</ul></ul>
+<h3>Airports</h3>
+    <ul>
+        <% @location.air.each do |port|%>
+        <li><%= link_to port.first.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, port.first.address, options = {:units => :km}).round(2) %> kilometers)</li>
+        <% end %>
+    </ul>
+<h3>Hospital</h3>
+    <ul>
+        <li><%= link_to @location.hosp.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, @location.hosp.address, options = {:units => :km}).round(2) %> kilometers)</li>
+    </ul>
+<h3>Bus Stops</h3>
+    <ul>
+        <% @location.bus.each do |stop|%>
+        <li>Bus Stop: <%= link_to stop.first.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, stop.first.address, options = {:units => :km}).round(2) %> kilometers)</li>
+        <% end %>
+    </ul>
+<h3>Restaurants</h3>
+    <ul>
+        <% @location.restaurant.each do |place|%>
+        <li><%= link_to place.first.address, @location %> (<%= Geocoder::Calculations.distance_between(@location.address, place.first.address, options = {:units => :km}).round(2) %> kilometers)</li>
+        <% end %>
+    </ul>
 
 
 <%= link_to 'Edit', edit_location_path(@location) %> |
