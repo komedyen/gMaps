@@ -9,13 +9,24 @@ require 'execjs'
 
 a = Mechanize.new
 page = a.get('https://maps.google.com/maps?q=otobus+duraklari+near+ilica+cesme+turkey')
-form = page.forms[0].submit
-doc = form.parser
-data = doc.css('script').text.to_s[64..-4][0..-14]
+gForm = page.forms[0].submit
+gDoc = gForm.parser
+data = gDoc.css('script').text.to_s[64..-4][0..-14]
+f = Mechanize.new
+formatter = f.get('http://jsonformat.com/')
+fForm = formatter.forms.first
+fForm.jsondata = data
+s = fForm.submit
+jData = s.forms[1].jsondata
+
+JSON.parse(jData)['overlays']['markers'].each do |node|
+  puts node['id']
+  puts node['latlng']['lat']
+  puts node['latlng']['lng']
+  puts ''
+end
 
 
-
-puts data
 
 
 

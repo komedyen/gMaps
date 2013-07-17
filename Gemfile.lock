@@ -125,6 +125,7 @@ DEPENDENCIES
   coffee-rails (~> 3.2.1)
   geocoder
   jquery-rails
+  json
   mechanize
   nokogiri
   rails (= 3.2.8)

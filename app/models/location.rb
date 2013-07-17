@@ -1,7 +1,11 @@
+#!/bin/env ruby
+# encoding: utf-8
+
 require 'nokogiri'
 require 'geocoder'
 require 'open-uri'
 require 'mechanize'
+require 'json'
 
 class Location < ActiveRecord::Base
   attr_accessible :address, :latitude, :longitude
@@ -10,62 +14,48 @@ class Location < ActiveRecord::Base
   after_validation :geocode, :reverse_geocode
 
   def air
-    @ports = []
     loc = Geocoder.search(address).first
-    prep = 'near+' << loc.address_components[4]['long_name'] << '+' << loc.country
-    agent = Mechanize.new
-    page = agent.get('https://maps.google.com/maps?q=airport+' << prep)
-    doc = page.parser
-    doc.css('span.pp-place-title').each do |link|
-      addr = link.content
-      airport = Geocoder.search(addr)
-      @ports << airport
-    end
-    @ports
+    prep = 'https://maps.google.com/maps?q=airport+near+' << loc.address_components[4]['long_name'] << '+' << loc.country
+    crawl(prep)
   end
 
   def bus
-    @stops = []
-    agent = Mechanize.new
-    page = agent.get('https://maps.google.com/maps?q=otobus+duraklari+near+' << address.tr(' ', '+'))
-    doc = page.parser
-    doc.css('span.pp-headline-item.pp-headline-address').each do |link|
-      addr = link.content
-      stop = Geocoder.search(addr)
-      @stops << stop
-    end
-
-    cdata = doc.css('iframe#vp')[1]
-    puts cdata
-    dHash = Hash.new([66,-33])
-
-
-    @stops
+    prep = 'https://maps.google.com/maps?q=otobus+duraklari+near+' << address.tr(' ', '+')
+    crawl(prep)
   end
 
   def restaurant
-    @places = []
-    agent = Mechanize.new
-    page = agent.get('https://maps.google.com/maps?q=restaurants+near+' << address.tr(' ', '+'))
-    doc = page.parser
-    begin
-      doc.css('span.pp-headline-item.pp-headline-address').each do |link|
-        addr = link.content
-        place = Geocoder.search(addr)
-        puts addr
-        @places << place
-      end
-    end while agent.click(page.search(:css => 'td.b'))
-    @places
+    prep = 'https://maps.google.com/maps?q=restaurants+near+' << address.tr(' ', '+')
+    crawl(prep)
   end
 
   def hosp
-    agent = Mechanize.new
-    page = agent.get('https://maps.google.com/maps?q=hospital+near+' << address.tr(' ', '+'))
-    doc = page.parser
-    link = doc.css('span.pp-headline-item.pp-headline-address').first
-    addr = link.content
-    hospital = Geocoder.search(addr).first
+    prep = 'https://maps.google.com/maps?q=hospital+near+' << address.tr(' ', '+')
+    crawl(prep)
+  end
+
+  def crawl(url)
+    @uno = []
+    a = Mechanize.new
+    page = a.get(url)
+    page.encoding = 'ISO-8859-1'
+    gForm = page.forms[0].submit
+    gDoc = gForm.parser
+    data = gDoc.css('script').text.to_s[64..-4][0..-14]
+    f = Mechanize.new
+    formatter = f.get('http://jsonformat.com/')
+    fForm = formatter.forms.first
+    fForm.jsondata = data
+    s = fForm.submit
+    jData = s.forms[1].jsondata
+    parsed = JSON.parse(jData)['overlays']['markers']
+    parsed.each do |node|
+      duo = node['id'].to_s << ' '
+      duo << node['latlng']['lat'].to_s << ' '
+      duo << node['latlng']['lng'].to_s
+      @uno << duo
+    end
+    @uno
   end
 
 end
