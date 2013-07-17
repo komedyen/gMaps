@@ -34,6 +34,12 @@ class Location < ActiveRecord::Base
       stop = Geocoder.search(addr)
       @stops << stop
     end
+
+    cdata = doc.css('iframe#vp')[1]
+    puts cdata
+    dHash = Hash.new([66,-33])
+
+
     @stops
   end
 

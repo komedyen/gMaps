@@ -1,0 +1,24 @@
+#!/bin/env ruby
+# encoding: utf-8
+
+require 'open-uri'
+require 'nokogiri'
+require 'json'
+require 'mechanize'
+require 'execjs'
+
+a = Mechanize.new
+page = a.get('https://maps.google.com/maps?q=otobus+duraklari+near+ilica+cesme+turkey')
+form = page.forms[0].submit
+doc = form.parser
+data = doc.css('script').text.to_s[64..-4][0..-14]
+
+
+
+puts data
+
+
+
+
+
+
