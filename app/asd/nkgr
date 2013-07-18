@@ -1,5 +1,5 @@
 #!/bin/env ruby
-# encoding: utf-8
+#encoding: utf-8
 
 require 'open-uri'
 require 'nokogiri'
@@ -8,23 +8,40 @@ require 'mechanize'
 require 'execjs'
 
 a = Mechanize.new
-page = a.get('https://maps.google.com/maps?q=otobus+duraklari+near+ilica+cesme+turkey')
-gForm = page.forms[0].submit
+page = a.get('https://maps.google.com/maps?q=hospitals+near+Dalyan Mh.,+4148.+Sokak,+35930 Çeşme/Izmir+Province,+Turkey')
+
+
+gsForm = page.forms[0]
+gsForm.encoding = 'utf-8'
+gForm = gsForm.submit
 gDoc = gForm.parser
 data = gDoc.css('script').text.to_s[64..-4][0..-14]
-f = Mechanize.new
-formatter = f.get('http://jsonformat.com/')
-fForm = formatter.forms.first
-fForm.jsondata = data
-s = fForm.submit
-jData = s.forms[1].jsondata
 
-JSON.parse(jData)['overlays']['markers'].each do |node|
-  puts node['id']
-  puts node['latlng']['lat']
-  puts node['latlng']['lng']
-  puts ''
-end
+
+puts data
+
+
+
+#@parsed = eval(data)[:overlays][:markers]
+#@parsed.each do |node|
+#  duo = node[:id].to_s << ' '
+#  duo << node[:latlng][:lat].to_s << ' '
+#  duo << node[:latlng][:lng].to_s
+#  puts duo
+#end
+
+
+
+
+
+
+
+#JSON.parse(jData)['overlays']['markers'].each do |node|
+#  puts node['id']
+#  puts node['latlng']['lat']
+#  puts node['latlng']['lng']
+#  puts ''
+#end
 
 
 

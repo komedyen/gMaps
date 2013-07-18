@@ -1,6 +1,3 @@
-#!/bin/env ruby
-# encoding: utf-8
-
 require 'nokogiri'
 require 'geocoder'
 require 'open-uri'
@@ -20,7 +17,7 @@ class Location < ActiveRecord::Base
   end
 
   def bus
-    prep = 'https://maps.google.com/maps?q=otobus+duraklari+near+' << address.tr(' ', '+')
+    prep = 'https://maps.google.com/maps?q=bus+stations+near+' << address.tr(' ', '+')
     crawl(prep)
   end
 
@@ -38,21 +35,16 @@ class Location < ActiveRecord::Base
     @uno = []
     a = Mechanize.new
     page = a.get(url)
-    page.encoding = 'ISO-8859-1'
-    gForm = page.forms[0].submit
+    gsForm = page.forms[0]
+    gsForm.encoding = 'utf-8'
+    gForm = gsForm.submit
     gDoc = gForm.parser
     data = gDoc.css('script').text.to_s[64..-4][0..-14]
-    f = Mechanize.new
-    formatter = f.get('http://jsonformat.com/')
-    fForm = formatter.forms.first
-    fForm.jsondata = data
-    s = fForm.submit
-    jData = s.forms[1].jsondata
-    parsed = JSON.parse(jData)['overlays']['markers']
-    parsed.each do |node|
-      duo = node['id'].to_s << ' '
-      duo << node['latlng']['lat'].to_s << ' '
-      duo << node['latlng']['lng'].to_s
+    @parsed = eval(data)[:overlays][:markers]
+    @parsed.each do |node|
+      duo = node[:id].to_s << ' '
+      duo << node[:latlng][:lat].to_s << ' '
+      duo << node[:latlng][:lng].to_s
       @uno << duo
     end
     @uno
