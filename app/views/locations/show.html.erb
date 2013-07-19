@@ -16,31 +16,34 @@
 </p>
 
 <h3>Airports</h3>
-    <ul>
-        <% @location.air.each do |duo|%>
-          <li><%= link_to duo.address, @location %></li>
-        <% end %>
-    </ul>
+<ul>
+  <% @location.air.each do |duo|%>
+      <li><%= link_to duo.address, @location %></li>
+  <% end %>
+</ul>
+
 <h3>Hospital</h3>
-    <ul>
-      <% @location.hosp.each do |duo|%>
-          <li><%= link_to duo, @location %></li>
-      <% end %>
-    </ul>
+<ul>
+  <% @location.hosp.each do |duo|%>
+      <li><%= link_to duo.address, @location %></li>
+  <% end %>
+</ul>
 <h3>Bus Stops</h3>
-    <ul>
-        <% @location.bus.each do |duo|%>
+<ul>
+  <% @location.bus.each do |duo|%>
 
-              <li><%= link_to duo, @location %></li>
+      <li><%= link_to duo.address, @location %></li>
 
-        <% end %>
-    </ul>
+  <% end %>
+</ul>
 <h3>Restaurants</h3>
-    <ul>
-        <% @location.restaurant.each do |duo|%>
-          <li><%= link_to duo, @location %></li>
-        <% end %>
-    </ul>
+<ul>
+  <% @location.restaurant.each do |duo|%>
+      <li><%= link_to duo.address, @location %></li>
+  <% end %>
+</ul>
+
+
 
 
 <%= link_to 'Edit', edit_location_path(@location) %> |

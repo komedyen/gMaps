@@ -12,26 +12,26 @@ class Location < ActiveRecord::Base
 
   def air
     loc = Geocoder.search(address).first
-    prep = 'https://maps.google.com/maps?q=airport+near+' << loc.address_components[4]['long_name'] << '+' << loc.country
-    crawl(prep,"airport")
+    prep = 'https://maps.google.com/maps?q=airports+near+' << loc.city << '+' << loc.country
+    crawl(prep, "airport")
   end
 
   def bus
     prep = 'https://maps.google.com/maps?q=bus+stations+near+' << address.tr(' ', '+')
-    crawl(prep,"bus station")
+    crawl(prep, "bus_station")
   end
 
   def restaurant
     prep = 'https://maps.google.com/maps?q=restaurants+near+' << address.tr(' ', '+')
-    crawl(prep,"restaurant")
+    crawl(prep, "point_of_interest")
   end
 
   def hosp
-    prep = 'https://maps.google.com/maps?q=hospital+near+' << address.tr(' ', '+')
-    crawl(prep,"hospital")
+    prep = 'https://maps.google.com/maps?q=Hospital+' << address.tr(' ', '+')
+    crawl(prep, "point_of_interest")
   end
 
-  def crawl(url,key)
+  def crawl(url, key)
     @uno = []
     a = Mechanize.new
     page = a.get(url)
@@ -39,21 +39,29 @@ class Location < ActiveRecord::Base
     gsForm.encoding = 'utf-8'
     gForm = gsForm.submit
     gDoc = gForm.parser
-    data = gDoc.css('script').text.to_s[64..-4][0..-14]
+    data = gDoc.css('script').text
+    data = data.to_s[64..-4][0..-14]
     parsed = eval(data)[:overlays][:markers]
     parsed.each do |node|
       prep = node[:latlng][:lat].to_s << ','
       prep << node[:latlng][:lng].to_s
-      @uno << validate(prep,key)
+      @uno << validate(prep, key)
     end
-    @uno
+    @uno.compact
   end
 
-  def validate(data,key)
-      coded = Geocoder.search(data)
+  def validate(data, key)
+    coded = Geocoder.search(data)
+    if key == "airport" || key == "bus_station"
       coded.each do |d|
-        return d if d.types.include?(key)
+        if d.types.include?(key) then
+          @result = d
+        end
       end
+    else
+        @result = coded.first
+    end
+    @result
   end
 
 end

@@ -30,6 +30,35 @@ puts data
 #  puts duo
 #end
 
+<h3>Airports</h3>
+    <ul>
+        <% @location.air.each do |duo|%>
+          <li><%= link_to duo.address, @location %></li>
+<% end %>
+    </ul>
+
+<h3>Hospital</h3>
+<ul>
+<% @location.hosp.each do |duo|%>
+      <li><%= link_to duo.address, @location %></li>
+  <% end %>
+</ul>
+<h3>Bus Stops</h3>
+<ul>
+  <% @location.bus.each do |duo|%>
+
+      <li><%= link_to duo.address, @location %></li>
+
+  <% end %>
+</ul>
+<h3>Restaurants</h3>
+<ul>
+  <% @location.restaurant.each do |duo|%>
+      <li><%= link_to duo.address, @location %></li>
+<% end %>
+</ul>
+
+
 
 
 
